@@ -302,7 +302,7 @@ class Lgr:
                 icrowend = icrowstart + self.ncpp
                 iccolstart = (jp - self.npcbeg) * self.ncpp
                 iccolend = iccolstart + self.ncpp
-                value = int(parent_array[ip, jp])
+                value = float(parent_array[ip, jp])
                 child_array[icrowstart:icrowend, iccolstart:iccolend] = value
         return child_array
 
