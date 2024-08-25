@@ -1,6 +1,57 @@
+import unittest
+
 import numpy as np
 
 from flopy.utils.lgrutil import Lgr, LgrToDisv
+
+
+class TestLgrUtil(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        nlayp = 5
+        nrowp = 5
+        ncolp = 5
+        delrp = 100.0
+        delcp = 100.0
+        topp = 100.0
+        botmp = [-100, -200, -300, -400, -500]
+        idomainp = np.ones((nlayp, nrowp, ncolp), dtype=int)
+
+        idomainp[:,0,:] = idomainp[:,-1,:] = idomainp[:,:,0] = idomainp[:,:,-1] = 0
+        idomainp[1:4, 2:4, 2:4] = 2
+        ncpp = 3
+        ncppl = [0, 1, 1, 1, 0]
+
+        cls.lgr = Lgr(
+            nlayp,
+            nrowp,
+            ncolp,
+            delrp,
+            delcp,
+            topp,
+            botmp,
+            idomainp,
+            ncpp=ncpp,
+            ncppl=ncppl,
+            xllp=100.0,
+            yllp=100.0,
+        )
+
+    def test_lgr_domain_with_zeros_idomainp(self):
+        lgr = self.lgr
+        assert lgr.get_idomain().shape == (3, 6, 6)
+
+    def test_lgr_flag_removed_from_idomain(self):
+        idomainp = self.lgr.parent.idomain
+        assert idomainp[0:2, 1:4, 1:4].max() == 0
+
+    def test_get_replicated_parent_array_cast_floats(self):
+        # tests replicated array is correctly casted to floats instead of ints
+        lgr = self.lgr
+        parent_array = np.ones((lgr.nrowp, lgr.ncolp)) * 1.5 #
+        child_array = lgr.get_replicated_parent_array(parent_array)
+        assert child_array.max() == 1.5
+        assert child_array.min() == 1.5
 
 
 def test_lgrutil():
@@ -12,7 +63,7 @@ def test_lgrutil():
     topp = 100.0
     botmp = [-100, -200, -300, -400, -500]
     idomainp = np.ones((nlayp, nrowp, ncolp), dtype=int)
-    idomainp[0:2, 1:4, 1:4] = 0
+    idomainp[0:2, 1:4, 1:4] = 2
     ncpp = 3
     ncppl = [1, 1, 0, 0, 0]
 
@@ -121,7 +172,7 @@ def test_lgrutil2():
 
     # Define relation of child to parent
     idomainp = np.ones((nlayp, nrowp, ncolp), dtype=int)
-    idomainp[:, 1:4, 1:4] = 0
+    idomainp[:, 1:4, 1:4] = 2
     ncpp = 3
     ncppl = nlayp * [1]
 
@@ -175,7 +226,7 @@ def test_lgrutil3():
     for k in range(nlayp):
         botmp[k] = -(k + 1) * dz
     idomainp = np.ones((nlayp, nrowp, ncolp), dtype=int)
-    idomainp[:, nrowp // 2, ncolp // 2] = 0
+    idomainp[:, nrowp // 2, ncolp // 2] = 2
     ncpp = 3
     ncppl = nlayp * [1]
     lgr = Lgr(

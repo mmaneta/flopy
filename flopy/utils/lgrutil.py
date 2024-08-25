@@ -161,9 +161,14 @@ class Lgr:
 
         # idomain
         assert idomainp.shape == (nlayp, nrowp, ncolp)
-        self.idomain = idomainp
-        idxl, idxr, idxc = np.asarray(idomainp == 0).nonzero()
-        assert idxl.shape[0] > 0, "no zero values found in idomain"
+        self._idomain = idomainp
+        idxl, idxr, idxc = np.asarray(idomainp == 2).nonzero()
+        assert idxl.shape[0] > 0, "no 2 values found in idomain"
+
+        # makes a copy of idomainp and zeroes out the lgr 2 flag
+        self.idomain = np.asarray(idomainp).copy()
+        self.idomain[idxl, idxr, idxc] = 0
+
 
         # child cells per parent and child cells per parent layer
         self.ncpp = ncpp
@@ -324,7 +329,7 @@ class Lgr:
             for ic in range(self.nrow):
                 for jc in range(self.ncol):
                     kp, ip, jp = self.get_parent_indices(kc, ic, jc)
-                    if self.idomain[kp, ip, jp] == 1:
+                    if (self._idomain[kp, ip, jp] == 1) or (self._idomain[kp, ip, jp] == 0):
                         idomain[kc, ic, jc] = 0
         return idomain
 
