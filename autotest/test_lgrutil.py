@@ -43,7 +43,7 @@ class TestLgrUtil(unittest.TestCase):
 
     def test_lgr_flag_removed_from_idomain(self):
         idomainp = self.lgr.parent.idomain
-        assert idomainp[0:2, 1:4, 1:4].max() == 0
+        assert idomainp[1:4, 2:4, 2:4].max() == 0
 
     def test_get_replicated_parent_array_cast_floats(self):
         # tests replicated array is correctly casted to floats instead of ints
@@ -52,6 +52,42 @@ class TestLgrUtil(unittest.TestCase):
         child_array = lgr.get_replicated_parent_array(parent_array)
         assert child_array.max() == 1.5
         assert child_array.min() == 1.5
+
+    def test_transfer_parent_idomain_values(self):
+        nlayp = 5
+        nrowp = 5
+        ncolp = 5
+        delrp = 100.0
+        delcp = 100.0
+        topp = 100.0
+        botmp = [-100, -200, -300, -400, -500]
+        idomainp = np.ones((nlayp, nrowp, ncolp), dtype=int)
+
+        idomainp[:,0,:] = idomainp[:,-1,:] = idomainp[:,:,0] = idomainp[:,:,-1] = 0
+        unmasked_idomainp = idomainp.copy()
+        unmasked_idomainp[1,3,3] = -1
+        idomainp[1:4, 2:4, 2:4] = 2
+        ncpp = 3
+        ncppl = [0, 1, 1, 1, 0]
+
+        lgr = Lgr(
+            nlayp,
+            nrowp,
+            ncolp,
+            delrp,
+            delcp,
+            topp,
+            botmp,
+            idomainp,
+            ncpp=ncpp,
+            ncppl=ncppl,
+            xllp=100.0,
+            yllp=100.0,
+            unmasked_idomainp=unmasked_idomainp,
+        )
+        idomain = lgr.get_idomain()
+        assert idomain.min() == -1
+
 
 
 def test_lgrutil():

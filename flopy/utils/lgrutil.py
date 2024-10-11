@@ -110,6 +110,7 @@ class Lgr:
         ncppl=1,
         xllp=0.0,
         yllp=0.0,
+        unmasked_idomainp=None,
     ):
         """
 
@@ -168,6 +169,11 @@ class Lgr:
         # makes a copy of idomainp and zeroes out the lgr 2 flag
         self.idomain = np.asarray(idomainp).copy()
         self.idomain[idxl, idxr, idxc] = 0
+
+        # unmasked parent idomain is the parent with the original idomain values
+        if unmasked_idomainp is not None:
+            assert unmasked_idomainp.shape == (nlayp, nrowp, ncolp)
+        self._unmasked_idomain = unmasked_idomainp
 
 
         # child cells per parent and child cells per parent layer
@@ -329,7 +335,11 @@ class Lgr:
             for ic in range(self.nrow):
                 for jc in range(self.ncol):
                     kp, ip, jp = self.get_parent_indices(kc, ic, jc)
-                    if (self._idomain[kp, ip, jp] == 1) or (self._idomain[kp, ip, jp] == 0):
+                    # transfer the parent idomain values to the child grid
+                    if self._unmasked_idomain is not None:
+                        idomain[kc, ic, jc] = self._unmasked_idomain[kp, ip, jp]
+                    # Masks out areas of the child domain where parent domain is valid or zero
+                    if (np.abs(self._idomain[kp, ip, jp]) == 1) or (self._idomain[kp, ip, jp] == 0):
                         idomain[kc, ic, jc] = 0
         return idomain
 
