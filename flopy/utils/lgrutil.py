@@ -378,25 +378,25 @@ class Lgr:
         # parent cell to left
         if jc % self.ncpp == 0:
             if jp - 1 >= 0:
-                if self.idomain[kp, ip, jp - 1] != 0:
+                if self.idomain[kp, ip, jp - 1] == 1:
                     parentlist.append(((kp, ip, jp - 1), -1))
 
         # parent cell to right
         if (jc + 1) % self.ncpp == 0:
             if jp + 1 < self.ncolp:
-                if self.idomain[kp, ip, jp + 1] != 0:
+                if self.idomain[kp, ip, jp + 1]  == 1:
                     parentlist.append(((kp, ip, jp + 1), 1))
 
         # parent cell to back
         if ic % self.ncpp == 0:
             if ip - 1 >= 0:
-                if self.idomain[kp, ip - 1, jp] != 0:
+                if self.idomain[kp, ip - 1, jp]  == 1:
                     parentlist.append(((kp, ip - 1, jp), 2))
 
         # parent cell to front
         if (ic + 1) % self.ncpp == 0:
             if ip + 1 < self.nrowp:
-                if self.idomain[kp, ip + 1, jp] != 0:
+                if self.idomain[kp, ip + 1, jp]  == 1:
                     parentlist.append(((kp, ip + 1, jp), -2))
 
         # parent cell to top is not possible
@@ -404,7 +404,7 @@ class Lgr:
         # parent cell to bottom
         if kc + 1 == self.ibcl[kp]:
             if kp + 1 < self.nlayp:
-                if self.idomain[kp + 1, ip, jp] != 0:
+                if self.idomain[kp + 1, ip, jp]  == 1:
                     parentlist.append(((kp + 1, ip, jp), -3))
 
         return parentlist
@@ -459,7 +459,7 @@ class Lgr:
                 for jc in range(ncolc):
                     plist = self.get_parent_connections(kc, ic, jc)
                     for (kp, ip, jp), idir in plist:
-                        if cidomain[kc, ic, jc] == 0:
+                        if cidomain[kc, ic, jc] <= 0: # consider idomain -1 also inactive
                             continue
 
                         # horizontal or vertical connection
