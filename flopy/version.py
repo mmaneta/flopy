@@ -1,4 +1,4 @@
 # flopy version file automatically created using
-# update_version.py on August 08, 2024 14:29:26
+# update_version.py on December 27, 2024 21:17:55
 
-__version__ = "3.9.1.eki_dev"
+__version__ = "3.10.2.dev0"
